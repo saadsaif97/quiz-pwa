@@ -54,7 +54,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div>
+    <div style={{ padding: '0 20px' }}>
       {gameOver && <EndScreen {...EndScreenProps} />}
       <h1 style={{ marginBottom: '20px' }}>Quiz</h1>
       {!over && (
