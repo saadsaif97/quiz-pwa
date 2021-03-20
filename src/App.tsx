@@ -60,7 +60,7 @@ const App: React.FC = () => {
   }
 
   if (offline) {
-    return <h3>Please go online</h3>
+    return <h3 style={{ textAlign: 'center' }}>Please go online</h3>
   }
 
   return (
