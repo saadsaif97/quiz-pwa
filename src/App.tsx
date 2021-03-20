@@ -11,17 +11,23 @@ const App: React.FC = () => {
   const [score, setScore] = useState(0)
   const [userAnswers, setUserAnswers] = useState<any>([])
   const [gameOver, setGameOver] = useState(false)
+  const [offline, setOffline] = useState(false)
 
   const startQuiz = async () => {
-    setLoading(true)
-    const fetchedQuestions = await getQuestions()
-    setQuestions(fetchedQuestions)
-    setLoading(false)
-    setOver(false)
-    setGameOver(false)
-    setUserAnswers([])
-    setNumber(0)
-    setScore(0)
+    // if online then contact the api
+    if (navigator.onLine) {
+      setLoading(true)
+      const fetchedQuestions = await getQuestions()
+      setQuestions(fetchedQuestions)
+      setLoading(false)
+      setOver(false)
+      setGameOver(false)
+      setUserAnswers([])
+      setNumber(0)
+      setScore(0)
+    } else {
+      setOffline(true)
+    }
   }
 
   const selectQuestion = (answer: string): void => {
@@ -51,6 +57,10 @@ const App: React.FC = () => {
     score,
     setScore,
     setGameOver,
+  }
+
+  if (offline) {
+    return <h3>Please go online</h3>
   }
 
   return (

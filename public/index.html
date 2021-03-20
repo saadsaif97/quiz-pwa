@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
+    <meta name="description" content="Web site created using create-react-app" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
@@ -26,7 +24,12 @@
     -->
     <title>React App</title>
   </head>
+
   <body>
+    <div id="token"></div>
+    <div id="msg"></div>
+    <div id="notis"></div>
+    <div id="err"></div>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <!--
@@ -39,5 +42,55 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-messaging.js"></script>
+    <script>
+      // Initialize Firebase
+      // TODO: Replace with your project's customized code snippet
+      var config = {
+        apiKey: "AIzaSyDfih2FriJ-EhlRlDSDUHaBawDG1q6bces",
+        authDomain: "quiz-pwa-af1ec.firebaseapp.com",
+        projectId: "quiz-pwa-af1ec",
+        storageBucket: "quiz-pwa-af1ec.appspot.com",
+        messagingSenderId: "559127726852",
+        appId: "1:559127726852:web:443a9531ec945eb1381e51",
+        measurementId: "G-7E4B84Z8EK"
+      };
+      firebase.initializeApp(config);
+
+      const messaging = firebase.messaging();
+      messaging
+        .requestPermission()
+        .then(function () {
+          console.log("Notification permission granted.");
+          // get the token in the form of promise
+          return messaging.getToken()
+        })
+        .then(function (token) {
+          console.log(token)
+        })
+        .catch(function (err) {
+          console.log("Unable to get permission to notify.", err);
+        });
+
+      let enableForegroundNotification = true;
+      messaging.onMessage(function (payload) {
+        console.log("Message received. ", payload);
+
+        if (enableForegroundNotification) {
+          const { title, ...options } = JSON.parse(payload.data.notification);
+          navigator.serviceWorker.getRegistrations().then(registration => {
+            registration[0].showNotification(title, options);
+          });
+        }
+      });
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./offline.js')
+      }
+    </script>
   </body>
+
 </html>
