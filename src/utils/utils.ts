@@ -1,4 +1,4 @@
-export const getShuffledArray = (arr) => {
+const shuffleArray = (arr: any) => {
   const newArr = arr.slice()
   for (let i = newArr.length - 1; i > 0; i--) {
     const rand = Math.floor(Math.random() * (i + 1))
@@ -6,3 +6,9 @@ export const getShuffledArray = (arr) => {
   }
   return newArr
 }
+
+const htmlDecode = (str: string) => {
+  return new DOMParser().parseFromString(str, 'text/html').body.innerText
+}
+
+export { shuffleArray, htmlDecode }

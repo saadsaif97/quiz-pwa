@@ -1,123 +1,82 @@
-import { useState, useRef, useEffect } from 'react'
-
-import { Button, Flex } from './components/StyledComponents'
-
+import { useState } from 'react'
 import { getQuestions } from './API'
-import QuestionCard from './components/QuestionCard'
-import { getShuffledArray } from './utils/utils'
+import QuestionsCard from './components/QuestionsCard'
+import EndScreen from './components/EndScreen'
 
-function App() {
-  const card = useRef() as React.MutableRefObject<HTMLInputElement>
-
-  const handleClick = (e: any) => {
-    // if click is in the card do nothing
-    if (card.current.contains(e.target)) return
-
-    // outside click, deselect answer and remove active class
-    setSelected(undefined)
-    setActiveIndex(-1)
-  }
-
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClick)
-    return () => {
-      document.removeEventListener('mousedown', handleClick)
-    }
-  }, [])
-
-  const [score, setScore] = useState(0)
-  const [correctAnswer, setCorrectAnswer] = useState('')
-  const [activeIndex, setActiveIndex] = useState(-1)
-  const [selected, setSelected] = useState(undefined)
-  const [gameOver, setGameOver] = useState(true)
-  const [loading, setLoading] = useState(true)
-  const [questionNum, setQuestionNum] = useState(0)
+const App: React.FC = () => {
   const [questions, setQuestions] = useState<any>([])
-  const [answers, setAnswers] = useState<any>([])
+  const [loading, setLoading] = useState(false)
+  const [over, setOver] = useState(true)
+  const [number, setNumber] = useState(0)
+  const [score, setScore] = useState(0)
+  const [userAnswers, setUserAnswers] = useState<any>([])
+  const [gameOver, setGameOver] = useState(false)
 
-  const startGame = async () => {
-    const data = await getQuestions()
-    setQuestions(data.results)
+  const startQuiz = async () => {
+    setLoading(true)
+    const fetchedQuestions = await getQuestions()
+    setQuestions(fetchedQuestions)
     setLoading(false)
-    setAnswers(
-      getShuffledArray([
-        data.results[0].correct_answer,
-        ...data.results[0].incorrect_answers,
-      ])
-    )
-    setCorrectAnswer(data.results[0].correct_answer)
-    setQuestionNum(0)
-    setSelected(undefined)
+    setOver(false)
     setGameOver(false)
+    setUserAnswers([])
+    setNumber(0)
     setScore(0)
-    setActiveIndex(-1)
   }
 
-  const next = () => {
-    if (questionNum === 9 && selected) {
-      startGame()
+  const selectQuestion = (answer: string): void => {
+    // filling the array index with object
+    userAnswers[number] = {
+      question: questions[number].question.question,
+      user_answer: answer,
+      correct_answer: questions[number].question.correct_answer,
+      answers: questions[number].answers,
     }
-
-    if (questionNum >= 0 && questionNum < 9) {
-      setQuestionNum((prev) => prev + 1)
-      setAnswers(
-        getShuffledArray([
-          questions[questionNum + 1].correct_answer,
-          ...questions[questionNum + 1].incorrect_answers,
-        ])
-      )
-      setCorrectAnswer(questions[questionNum + 1].correct_answer)
-      // deselect answer and remove active class
-      setSelected(undefined)
-      // increase score if answer is correct
-      setActiveIndex(-1)
-      if (selected === correctAnswer) {
-        setScore(score + 1)
-      }
-    }
+    setUserAnswers([...userAnswers])
   }
 
-  const previous = () => {
-    if (questionNum > 0 && questionNum <= 9) {
-      setQuestionNum((prev) => prev - 1)
-      setAnswers([
-        questions[questionNum - 1].correct_answer,
-        ...questions[questionNum - 1].incorrect_answers,
-      ])
-      setCorrectAnswer(questions[questionNum - 1].correct_answer)
-      // deselect answer and remove active class
-      setSelected(undefined)
-      setActiveIndex(-1)
-    }
+  const EndScreenProps = {
+    userAnswers,
+    startQuiz,
+    score,
+  }
+
+  const cardProps = {
+    number,
+    setNumber,
+    questions,
+    selectQuestion,
+    userAnswers,
+    setUserAnswers,
+    score,
+    setScore,
+    setGameOver,
   }
 
   return (
-    <Flex ref={card} width='400px' height='max-content'>
-      <h1>Quiz App</h1>
-      <h1>{correctAnswer}</h1>
-      <h1>{selected}</h1>
-      <h1>{score}</h1>
-      {gameOver && (
-        <Button onClick={() => startGame()} style={{ margin: '20px 0' }}>
-          Start quiz
-        </Button>
+    <div>
+      {gameOver && <EndScreen {...EndScreenProps} />}
+      <h1 style={{ marginBottom: '20px' }}>Quiz</h1>
+      {!over && (
+        <>
+          <p style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span>Question: {number + 1}/10</span>
+            <span>Score: {score}</span>
+          </p>
+          <hr />
+        </>
       )}
-      {loading ? (
-        <h1>Click Start button to Start quiz</h1>
-      ) : (
-        <QuestionCard
-          questionNum={questionNum}
-          next={next}
-          previous={previous}
-          questions={questions}
-          answers={answers}
-          selected={selected}
-          setSelected={setSelected}
-          activeIndex={activeIndex}
-          setActiveIndex={setActiveIndex}
-        />
+      {/* show when loading data */}
+      {loading && <h4>Loading...</h4>}
+      {/* show start button when game is over */}
+      {!loading && over && (
+        <button className='btn' onClick={startQuiz}>
+          Start Quiz
+        </button>
       )}
-    </Flex>
+      {/* show card when game is not over */}
+      {!over && <QuestionsCard {...cardProps} />}
+    </div>
   )
 }
 
