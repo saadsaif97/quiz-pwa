@@ -1,8 +1,8 @@
 // if we cache our service worker then new one will not be updated
 
 // we can change the version to trigger install event
-const staticCacheName = 'static-shell-v1'
-const dynamicCacheName = 'dynamic-assets-v1'
+const staticCacheName = 'static-shell-v2'
+const dynamicCacheName = 'dynamic-assets-v2'
 const staticAssets = ['./']
 
 // limit dynamic cache items so that we donot cause burden
